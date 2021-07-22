@@ -7,8 +7,8 @@ set ruler " 行号和列号
 set nowrap " 设置超过窗口宽度的行不自动回绕显示
 set hidden " 允许在有未保存的修改时切换缓冲区，此时的修改由 vim 负责保存
 set nobackup " 设置覆盖文件时不保留备份文件
-" set nowritebackup
-set clipboard+=unnamed
+set nowritebackup
+set clipboard^=unnamed,unnamedplus
 set expandtab "tab转space
 set smarttab " 插入Tab时使用shiftwidth
 set shiftwidth=2 " 设置执行Vim普通模式下的缩进操作
@@ -53,36 +53,36 @@ nnoremap <silent> # #zz
 nnoremap <silent> g* g*zz
 nnoremap z i<BS><Esc>l
 noremap qq <ESC>:q!<CR>
-nmap <CR> o<Esc>
-nmap <F6> :cn<cr>
-nmap <F7> :cp<cr>
+noremap <C-s> :w<CR>
+" noremap <C-S> :%s/\s\+$//<CR>:let @/=''<CR>
+noremap <C-w> :wq<CR>
+nnoremap <CR> o<Esc>
+nnoremap <F5> :cn<CR>
+nnoremap <F6> :cp<CR>
+nnoremap <F7> :cclose<CR>
 inoremap <C-L> <Right>
 inoremap <C-H> <Left>
 inoremap <C-J> <Down>
 inoremap <C-K> <Up>
 inoremap <C-D>w <Esc>ldwi
 inoremap <C-D>l <Esc>ddi
-imap <C-a> <Home>
-imap <C-e> <End>
-"tnoremap <Esc> <C-\><C-n>:q!<CR>
+inoremap <C-a> <Home>
+inoremap <C-e> <End>
+tnoremap <Esc> <C-\><C-n>
 vnoremap < <gv
 vnoremap > >gv
+
 cmap w!! w !sudo tee >/dev/null %
 
 let mapleader = " "
 noremap <LEADER>w :bd<CR>
-noremap <LEADER>s :w<CR>
-noremap <LEADER>S :%s/\s\+$//<CR>:let @/=''<CR>
-noremap <LEADER>q :wq<CR>
 noremap <LEADER><CR> :nohlsearch<CR>
 noremap <LEADER>sc :set spell!<CR>
 noremap <LEADER>/ :term<CR>
 noremap <LEADER>\ :g/^\s*$/d<CR>
 
 call plug#begin('~/.vim/plugged')
-"Plug 'ervandew/supertab'
 Plug 'metalelf0/supertab'
-" Plug 'husixu1/vim-fusiontab'
 
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
 
@@ -110,10 +110,25 @@ Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
 Plug 'vim-scripts/DoxygenToolkit.vim'
-"Plug 'Raimondi/delimitMate'
 Plug 'Chiel92/vim-autoformat'
 Plug 'luochen1990/rainbow'
+Plug 'voldikss/vim-translator'
+Plug 'easymotion/vim-easymotion'
+
+Plug 'plasticboy/vim-markdown'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 call plug#end()
+" translator
+nmap <silent> <Leader>t <Plug>TranslateW
+vmap <silent> <Leader>t <Plug>TranslateWV
+" easymotion
+nmap <Leader>ss <Plug>(easymotion-s2)
+" markdown-preview
+let g:mkdp_browser = 'firefox'
+let g:mkdp_refresh_slow = 1
+let g:mkdp_auto_close = 0
+let g:mkdp_refresh_slow = 1
+nmap <silent> <F9> <Plug>MarkdownPreview
 " vim-commentary, gcap注释一段，gcu撤销注释操作
 autocmd FileType c,cpp set commentstring=//\ %s
 " ranbow
@@ -142,7 +157,7 @@ nmap <leader>+ <Plug>AirlineSelectNextTab
 noremap <F4> :CocCommand clangd.switchSourceHeader<CR>
 " coc-snippets
 let g:snips_author = "fengyu"
-imap <C-p> <Plug>(coc-snippets-expand)
+" imap <C-e> <Plug>(coc-snippets-expand)
 " coc-nvim
 inoremap <silent><expr> <TAB>
       \ pumvisible() ? "\<C-n>" :
@@ -168,7 +183,7 @@ endfunction
 nmap <leader>rn <Plug>(coc-rename)
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
-"nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 " NERDTree
 let g:NERDTreeDirArrowExpandable = '+'
@@ -184,6 +199,8 @@ nmap <C-p> :Files<CR>
 nmap <C-e> :Buffers<CR>
 let g:fzf_action = { 'ctrl-e': 'edit' }
 " ale
+" nnoremap <LEADER>[ :ALEPrevious<CR>
+" nnoremap <LEADER>] :ALENext<CR>
 set fenc=
 "let g:ale_sign_error = '✗'
 "let g:ale_sign_warning = '⚡'
@@ -244,5 +261,42 @@ func! CompileRunGcc()
     :term ./%<
   endif
 endfunc
+" search todo
+command! Todo vimgrep /todo/ /fixme/ % | copen
 
-
+" cpp-class-generate
+ function! Class(ClassName)                                                                                              
+    "==================  editing header file =====================                                                       
+     let header = a:ClassName.".h"                                                                                                                                                                                                                                                                                        
+     :vsp %:h/.h                                                                                                                                                                                                                             
+     call append(0,"#ifndef ".toupper(a:ClassName)."_H")                                                                 
+     call append(1,"#define ".toupper(a:ClassName)."_H")                                                           
+     call append(2," ")                                                                                                  
+     call append(3,"class ".a:ClassName )                                                                                
+     call append(4, "{")                                                                                                 
+     call append(5, "   public:")                                                                                        
+     call append(6, "      ".a:ClassName."();")                                                                          
+     call append(7, "      virtual ~".a:ClassName."();")                                                                 
+     call append(8, "   protected:")                                                                                     
+     call append(9, "   private:")                                                                                       
+     call append(10, "};")                                                                                               
+     call append(11,"#endif // ".toupper(a:ClassName)."_H")                                                              
+     :execute 'write' header                                                                                             
+   "================== editing source file ========================                                                      
+     let src    = a:ClassName.".cpp"                                                                                     
+     :vsp %:h/.cpp                                                                                                                                                                                                                     
+     call append(0,"#include ".a:ClassName.".h")                                                                          
+     call append(1," ")                                                                                                   
+     call append(2,a:ClassName."::".a:ClassName."()")                                                                           
+     call append(3,"{")                                                                                                   
+     call append(4,"//ctor ")                                                                                             
+     call append(5,"}")                                                                                                   
+     call append(6," ")                                                                                                   
+     call append(7," ")                                                                                                   
+     call append(8,a:ClassName."::~".a:ClassName."()")                                                                         
+     call append(9,"{")                                                                                                   
+     call append(10,"//dtor ")                                                                                            
+     call append(11,"}")                                                                                                  
+     :execute 'write' src
+endfunction
+command! -nargs=1 Class call Class(<f-args>)
