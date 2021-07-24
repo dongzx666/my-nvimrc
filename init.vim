@@ -38,6 +38,8 @@ filetype on " 文件类型检测功能
 filetype plugin on " 加载文件类型插件功能
 filetype indent on "  为不同类型的文件定义不同的缩进格式
 
+nmap <C-\> gcc
+vmap <C-\> gc
 noremap <silent> <C-j> 5j
 noremap <silent> <C-k> 5k
 noremap <silent> <C-h> b
@@ -55,7 +57,7 @@ nnoremap z i<BS><Esc>l
 noremap qq <ESC>:q!<CR>
 noremap <C-s> :w<CR>
 " noremap <C-S> :%s/\s\+$//<CR>:let @/=''<CR>
-noremap <C-w> :wq<CR>
+" noremap <C-w> :wq<CR>
 nnoremap <CR> o<Esc>
 nnoremap <F5> :cn<CR>
 nnoremap <F6> :cp<CR>
@@ -110,7 +112,7 @@ Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
 Plug 'vim-scripts/DoxygenToolkit.vim'
-Plug 'Chiel92/vim-autoformat'
+" Plug 'Chiel92/vim-autoformat'
 Plug 'luochen1990/rainbow'
 Plug 'voldikss/vim-translator'
 Plug 'easymotion/vim-easymotion'
@@ -133,8 +135,6 @@ nmap <silent> <F9> <Plug>MarkdownPreview
 autocmd FileType c,cpp set commentstring=//\ %s
 " ranbow
 let g:rainbow_active = 1
-" vim-autoformat
-noremap <F3> :Autoformat<CR>
 " vim-scheme
 syntax enable
 set background=dark
@@ -185,6 +185,7 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+noremap <F3> :call CocAction('format')<CR>
 " NERDTree
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
@@ -220,8 +221,8 @@ let g:ale_c_gcc_options = '-Wall -O2 -std=c99'
 let g:ale_cpp_gcc_options = '-Wall -O2 -std=c++11'
 let g:ale_c_cppcheck_options = ''
 let g:ale_cpp_cppcheck_options = ''
-nmap <silent> <A-k> <Plug>(ale_previous_wrap)
-nmap <silent> <A-j> <Plug>(ale_next_wrap)
+nmap <silent> <LEADER>[ <Plug>(ale_previous_wrap)
+nmap <silent> <LEADER>] <Plug>(ale_next_wrap)
 nmap <Leader>d :ALEDetail<CR>
 " tagbar
 set tags=./.tags;,.tags
