@@ -1,5 +1,5 @@
 set encoding=UTF-8 "编码
-set guifont=DroidSansMono\ Nerd\ Font\ 11
+" set guifont=DroidSansMono\ Nerd\ Font\ 11
 set autoread " 当前文件在 Vim 外被修改且未在 Vim 里面重新载入的话，则自动重新读取
 set number "显示行号
 set cursorline  " 高亮当前行光标
@@ -78,6 +78,7 @@ cmap w!! w !sudo tee >/dev/null %
 
 let mapleader = " "
 noremap <LEADER>w :bd<CR>
+noremap <LEADER>q :bd!<CR>
 noremap <LEADER><CR> :nohlsearch<CR>
 noremap <LEADER>sc :set spell!<CR>
 noremap <LEADER>/ :term<CR>
@@ -111,14 +112,17 @@ Plug 'octol/vim-cpp-enhanced-highlight'
 
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
-Plug 'vim-scripts/DoxygenToolkit.vim'
+" Plug 'vim-scripts/DoxygenToolkit.vim'
 " Plug 'Chiel92/vim-autoformat'
 Plug 'luochen1990/rainbow'
 Plug 'voldikss/vim-translator'
 Plug 'easymotion/vim-easymotion'
+Plug 'Yggdroot/indentLine'
 
-Plug 'plasticboy/vim-markdown'
+" Plug 'plasticboy/vim-markdown'
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+Plug 'lambdalisue/vim-manpager'
+Plug 'gauteh/vim-cppman'
 call plug#end()
 " translator
 nmap <silent> <Leader>t <Plug>TranslateW
@@ -142,6 +146,28 @@ colorscheme gruvbox
 " colorscheme dracula
 let g:solarized_termcolors=256
 "vim-airline
+if !exists('g:airline_symbols')
+  let g:airline_symbols = {}
+endif
+let g:airline_left_sep = ''
+let g:airline_left_alt_sep = ''
+let g:airline_right_sep = ''
+let g:airline_right_alt_sep = ''
+let g:airline_symbols.branch = ''
+let g:airline_symbols.colnr = 'C:'
+let g:airline_symbols.readonly = ''
+let g:airline_symbols.linenr = ' L:'
+let g:airline_symbols.maxlinenr = ' | '
+let g:airline_symbols.dirty='⚡'
+let g:airline_powerline_fonts = 1
+let g:airline#parts#ffenc#skip_expected_string='utf-8[unix]'
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
+" let g:airline#extensions#tabline#buffer_nr_show = 0
+let g:airline#extensions#whitespace#enabled = 0
+let g:airline#extensions#ale#enabled = 1
+let g:airline_theme='angr'
 nmap <leader>1 <Plug>AirlineSelectTab1
 nmap <leader>2 <Plug>AirlineSelectTab2
 nmap <leader>3 <Plug>AirlineSelectTab3
@@ -170,7 +196,7 @@ function! s:check_back_space() abort
 endfunction
 inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
       \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
-nnoremap <silent> K :call <SID>show_documentation()<CR>
+nnoremap <silent> D :call <SID>show_documentation()<CR>
 function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)
     execute 'h '.expand('<cword>')
@@ -179,6 +205,10 @@ function! s:show_documentation()
   else
     execute '!' . &keywordprg . " " . expand('<cword>')
   endif
+endfunction
+nnoremap <silent> K :call <SID>show_mandoc()<CR>
+function! s:show_mandoc()
+  execute 'tab Man '.expand('<cword>')
 endfunction
 nmap <leader>rn <Plug>(coc-rename)
 nmap <silent> gd <Plug>(coc-definition)
@@ -191,21 +221,18 @@ let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
 nnoremap <C-n> :NERDTreeToggle<CR>
 nnoremap <leader>n :NERDTreeFocus<CR>
-" vim-airline
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#left_sep = ' '
-let g:airline#extensions#tabline#left_alt_sep = '|'
 " fzf
 nmap <C-p> :Files<CR>
 nmap <C-e> :Buffers<CR>
 let g:fzf_action = { 'ctrl-e': 'edit' }
+let $FZF_DEFAULT_COMMAND = "fdfind --exclude={.cache,.git,.idea,.vscode,.sass-cache,node_modules,tmp,CMakeFiles} --type f"
 " ale
 " nnoremap <LEADER>[ :ALEPrevious<CR>
 " nnoremap <LEADER>] :ALENext<CR>
 set fenc=
 "let g:ale_sign_error = '✗'
 "let g:ale_sign_warning = '⚡'
-let g:ale_statusline_format = ['✗ %d', '⚡ %d', '✔ OK']
+" let g:ale_statusline_format = ['✗ %d', '⚡ %d', '✔ OK']
 let g:ale_linters = {
       \   'cpp': ['g++'],
       \   'c': ['gcc'],
@@ -264,40 +291,4 @@ func! CompileRunGcc()
 endfunc
 " search todo
 command! Todo vimgrep /todo/ /fixme/ % | copen
-
-" cpp-class-generate
- function! Class(ClassName)                                                                                              
-    "==================  editing header file =====================                                                       
-     let header = a:ClassName.".h"                                                                                                                                                                                                                                                                                        
-     :vsp %:h/.h                                                                                                                                                                                                                             
-     call append(0,"#ifndef ".toupper(a:ClassName)."_H")                                                                 
-     call append(1,"#define ".toupper(a:ClassName)."_H")                                                           
-     call append(2," ")                                                                                                  
-     call append(3,"class ".a:ClassName )                                                                                
-     call append(4, "{")                                                                                                 
-     call append(5, "   public:")                                                                                        
-     call append(6, "      ".a:ClassName."();")                                                                          
-     call append(7, "      virtual ~".a:ClassName."();")                                                                 
-     call append(8, "   protected:")                                                                                     
-     call append(9, "   private:")                                                                                       
-     call append(10, "};")                                                                                               
-     call append(11,"#endif // ".toupper(a:ClassName)."_H")                                                              
-     :execute 'write' header                                                                                             
-   "================== editing source file ========================                                                      
-     let src    = a:ClassName.".cpp"                                                                                     
-     :vsp %:h/.cpp                                                                                                                                                                                                                     
-     call append(0,"#include ".a:ClassName.".h")                                                                          
-     call append(1," ")                                                                                                   
-     call append(2,a:ClassName."::".a:ClassName."()")                                                                           
-     call append(3,"{")                                                                                                   
-     call append(4,"//ctor ")                                                                                             
-     call append(5,"}")                                                                                                   
-     call append(6," ")                                                                                                   
-     call append(7," ")                                                                                                   
-     call append(8,a:ClassName."::~".a:ClassName."()")                                                                         
-     call append(9,"{")                                                                                                   
-     call append(10,"//dtor ")                                                                                            
-     call append(11,"}")                                                                                                  
-     :execute 'write' src
-endfunction
-command! -nargs=1 Class call Class(<f-args>)
+command! -nargs=? Help help <args> | only
