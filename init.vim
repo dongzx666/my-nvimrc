@@ -59,9 +59,11 @@ noremap <C-s> :w<CR>
 " noremap <C-S> :%s/\s\+$//<CR>:let @/=''<CR>
 " noremap <C-w> :wq<CR>
 nnoremap <CR> o<Esc>
-nnoremap <F5> :cn<CR>
-nnoremap <F6> :cp<CR>
-nnoremap <F7> :cclose<CR>
+" nnoremap <F5> :cn<CR>
+" nnoremap <F6> :cp<CR>
+" nnoremap <F7> :cclose<CR>
+nnoremap [q :cprev<CR>
+nnoremap ]q :cnext<CR>
 inoremap <C-L> <Right>
 inoremap <C-H> <Left>
 inoremap <C-J> <Down>
@@ -83,6 +85,8 @@ noremap <LEADER><CR> :nohlsearch<CR>
 noremap <LEADER>sc :set spell!<CR>
 noremap <LEADER>/ :term<CR>
 noremap <LEADER>\ :g/^\s*$/d<CR>
+nnoremap <Leader>co :copen<CR>
+nnoremap <Leader>cc :cclose<CR>
 
 call plug#begin('~/.vim/plugged')
 Plug 'metalelf0/supertab'
@@ -144,7 +148,7 @@ syntax enable
 set background=dark
 colorscheme gruvbox
 " colorscheme dracula
-let g:solarized_termcolors=256
+" let g:solarized_termcolors=256
 "vim-airline
 if !exists('g:airline_symbols')
   let g:airline_symbols = {}
@@ -164,7 +168,7 @@ let g:airline#parts#ffenc#skip_expected_string='utf-8[unix]'
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#left_sep = ' '
 let g:airline#extensions#tabline#left_alt_sep = '|'
-" let g:airline#extensions#tabline#buffer_nr_show = 0
+let g:airline#extensions#tabline#buffer_idx_mode = 1
 let g:airline#extensions#whitespace#enabled = 0
 let g:airline#extensions#ale#enabled = 1
 let g:airline_theme='angr'
@@ -215,7 +219,11 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+" nmap <silent> [g <Plug>(coc-diagnostic-prev)
+" nmap <silent> ]g <Plug>(coc-diagnostic-next)
+nmap <leader>qf  <Plug>(coc-fix-current)
 noremap <F3> :call CocAction('format')<CR>
+command! -nargs=? Fold :call     CocAction('fold', <f-args>)
 " NERDTree
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
@@ -225,7 +233,8 @@ nnoremap <leader>n :NERDTreeFocus<CR>
 nmap <C-p> :Files<CR>
 nmap <C-e> :Buffers<CR>
 let g:fzf_action = { 'ctrl-e': 'edit' }
-let $FZF_DEFAULT_COMMAND = "fdfind --exclude={.cache,.git,.idea,.vscode,.sass-cache,node_modules,tmp,CMakeFiles} --type f"
+let $FZF_DEFAULT_COMMAND = "rg --files"
+" let $FZF_DEFAULT_COMMAND = "fdfind --exclude={.cache,.git,.idea,.vscode,.sass-cache,node_modules,tmp,CMakeFiles} --type f"
 " ale
 " nnoremap <LEADER>[ :ALEPrevious<CR>
 " nnoremap <LEADER>] :ALENext<CR>
@@ -234,9 +243,13 @@ set fenc=
 "let g:ale_sign_warning = '⚡'
 " let g:ale_statusline_format = ['✗ %d', '⚡ %d', '✔ OK']
 let g:ale_linters = {
-      \   'cpp': ['g++'],
-      \   'c': ['gcc'],
-      \}
+\   'cpp': ['gcc', 'cppcheck'],
+\   'c': ['gcc', 'cppcheck'],
+\}
+" let g:ale_fixers = {
+" \   'cpp': ['clang-format'],
+" \   '*': ['remove_trailing_lines', 'trim_whitespace'],
+" \}
 let g:ale_linters_explicit = 1
 let g:ale_lint_on_text_changed = 'normal'
 let g:ale_lint_on_insert_leave = 1
@@ -248,6 +261,12 @@ let g:ale_c_gcc_options = '-Wall -O2 -std=c99'
 let g:ale_cpp_gcc_options = '-Wall -O2 -std=c++11'
 let g:ale_c_cppcheck_options = ''
 let g:ale_cpp_cppcheck_options = ''
+" let g:ale_cpp_clangtidy_checks = []
+" let g:ale_cpp_clangtidy_executable = 'clang-tidy'
+" let g:ale_c_parse_compile_commands=1
+" let g:ale_cpp_clangtidy_extra_options = ''
+" let g:ale_cpp_clangtidy_options = ''
+" let g:ale_set_balloons=1
 nmap <silent> <LEADER>[ <Plug>(ale_previous_wrap)
 nmap <silent> <LEADER>] <Plug>(ale_next_wrap)
 nmap <Leader>d :ALEDetail<CR>
@@ -268,6 +287,7 @@ let g:cpp_member_variable_highlight = 1
 let g:cpp_class_decl_highlight = 1
 let g:cpp_posix_standard = 1
 let g:cpp_experimental_template_highlight = 1
+let g:cpp_concepts_highlight = 1
 " supertab
 let g:SuperTabDefaultCompletionType = '<C-n>'
 " ultisnips
@@ -275,7 +295,7 @@ let g:UltiSnipsExpandTrigger="<c-e>"
 let g:UltiSnipsJumpForwardTrigger="<c-j>"
 let g:UltiSnipsJumpBackwardTrigger="<c-k>"
 " function-compile
-noremap r :call CompileRunGcc()<CR>
+noremap <F1> :call CompileRunGcc()<CR>
 func! CompileRunGcc()
   exec "w"
   if &filetype == 'c'
@@ -289,6 +309,10 @@ func! CompileRunGcc()
     :term ./%<
   endif
 endfunc
+" grep
+set grepprg=rg\ --vimgrep\ --smart-case\ --follow
+set grepformat^=%f:%l:%c:%m
+command! -nargs=+ Grep execute 'silent grep! <args>' | copen
 " search todo
-command! Todo vimgrep /todo/ /fixme/ % | copen
+command! Todo execute 'silent grep! todo' | copen
 command! -nargs=? Help help <args> | only
