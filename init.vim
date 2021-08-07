@@ -34,6 +34,11 @@ set nrformats= " <C-a>和<C-x>十进制
 " set foldmethod=indent
 " set foldlevel=99
 
+" 记住行号
+if has("autocmd")
+  au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+endif
+
 filetype on " 文件类型检测功能
 filetype plugin on " 加载文件类型插件功能
 filetype indent on "  为不同类型的文件定义不同的缩进格式
@@ -55,15 +60,15 @@ nnoremap <silent> # #zz
 nnoremap <silent> g* g*zz
 nnoremap z i<BS><Esc>l
 noremap qq <ESC>:q!<CR>
-noremap <C-s> :w<CR>
+noremap <C-s> :wa<CR>
 " noremap <C-S> :%s/\s\+$//<CR>:let @/=''<CR>
 " noremap <C-w> :wq<CR>
-nnoremap <CR> o<Esc>
+" nnoremap <CR> o<Esc>
 " nnoremap <F5> :cn<CR>
 " nnoremap <F6> :cp<CR>
 " nnoremap <F7> :cclose<CR>
-nnoremap [q :cprev<CR>
-nnoremap ]q :cnext<CR>
+nnoremap [c :cprev<CR>
+nnoremap ]c :cnext<CR>
 inoremap <C-L> <Right>
 inoremap <C-H> <Left>
 inoremap <C-J> <Down>
@@ -78,15 +83,15 @@ vnoremap > >gv
 
 cmap w!! w !sudo tee >/dev/null %
 
-let mapleader = " "
-noremap <LEADER>w :bd<CR>
-noremap <LEADER>q :bd!<CR>
-noremap <LEADER><CR> :nohlsearch<CR>
-noremap <LEADER>sc :set spell!<CR>
-noremap <LEADER>/ :term<CR>
-noremap <LEADER>\ :g/^\s*$/d<CR>
-nnoremap <Leader>co :copen<CR>
-nnoremap <Leader>cc :cclose<CR>
+let mapleader=" "
+nnoremap <LEADER>w :bd<CR>
+nnoremap <LEADER>q :bd!<CR>
+nnoremap <LEADER><CR> :nohlsearch<CR>
+nnoremap <LEADER>sc :set spell!<CR>
+nnoremap <LEADER>/ :term<CR>
+nnoremap <LEADER>\ :g/^\s*$/d<CR>
+nnoremap <LEADER>co :copen<CR>
+nnoremap <LEADER>cc :cclose<CR>
 
 call plug#begin('~/.vim/plugged')
 Plug 'metalelf0/supertab'
@@ -128,11 +133,14 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': 
 Plug 'lambdalisue/vim-manpager'
 Plug 'gauteh/vim-cppman'
 call plug#end()
+" indentLine
+autocmd FileType json,markdown let g:indentLine_conceallevel = 0
 " translator
 nmap <silent> <Leader>t <Plug>TranslateW
 vmap <silent> <Leader>t <Plug>TranslateWV
 " easymotion
 nmap <Leader>ss <Plug>(easymotion-s2)
+let g:EasyMotion_smartcase = 1
 " markdown-preview
 let g:mkdp_browser = 'firefox'
 let g:mkdp_refresh_slow = 1
@@ -169,6 +177,18 @@ let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#left_sep = ' '
 let g:airline#extensions#tabline#left_alt_sep = '|'
 let g:airline#extensions#tabline#buffer_idx_mode = 1
+let g:airline#extensions#tabline#buffer_idx_format = {
+  \ '1': '① ',
+  \ '2': '② ',
+  \ '3': '③ ',
+  \ '4': '④ ',
+  \ '5': '⑤ ',
+  \ '6': '⑥ ',
+  \ '7': '⑦ ',
+  \ '8': '⑧ ',
+  \ '9': '⑨ ',
+  \ '0': '⓪ ',
+\}
 let g:airline#extensions#whitespace#enabled = 0
 let g:airline#extensions#ale#enabled = 1
 let g:airline_theme='angr'
@@ -219,56 +239,79 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
-" nmap <silent> [g <Plug>(coc-diagnostic-prev)
-" nmap <silent> ]g <Plug>(coc-diagnostic-next)
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
 nmap <leader>qf  <Plug>(coc-fix-current)
+nmap <leader>ac  <Plug>(coc-codeaction)
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+xmap <leader>a  <Plug>(coc-codeaction-selected)
+nmap <leader>a  <Plug>(coc-codeaction-selected)
+xmap if <Plug>(coc-funcobj-i)
+xmap af <Plug>(coc-funcobj-a)
+omap if <Plug>(coc-funcobj-i)
+omap af <Plug>(coc-funcobj-a)
 noremap <F3> :call CocAction('format')<CR>
 command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+command! -nargs=0 Format :call CocAction('format')
+command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
+let g:coc_global_extensions = [
+  \ 'coc-snippets',
+  \ 'coc-json',
+  \ 'coc-yaml',
+  \ 'coc-cmake',
+  \ 'coc-marketplace',
+  \ 'coc-clangd',
+  \ 'coc-pairs']
 " NERDTree
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
+let g:NERDTreeShowHidden = 1
 nnoremap <C-n> :NERDTreeToggle<CR>
 nnoremap <leader>n :NERDTreeFocus<CR>
 " fzf
 nmap <C-p> :Files<CR>
 nmap <C-e> :Buffers<CR>
 let g:fzf_action = { 'ctrl-e': 'edit' }
+let g:fzf_preview_window  = [ 'up:40%', 'ctrl-/' ]
 let $FZF_DEFAULT_COMMAND = "rg --files"
 " let $FZF_DEFAULT_COMMAND = "fdfind --exclude={.cache,.git,.idea,.vscode,.sass-cache,node_modules,tmp,CMakeFiles} --type f"
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --hidden --smart-case --no-heading --color=always '.shellescape(<q-args>), 1,
+  \   <bang>0 ? fzf#vim#with_preview({'options': '--delimiter : --nth 4..'})
+  \           : fzf#vim#with_preview({'options': '--delimiter : --nth 4.. -e'}),
+  \   <bang>0)
+
 " ale
-" nnoremap <LEADER>[ :ALEPrevious<CR>
-" nnoremap <LEADER>] :ALENext<CR>
 set fenc=
-"let g:ale_sign_error = '✗'
-"let g:ale_sign_warning = '⚡'
-" let g:ale_statusline_format = ['✗ %d', '⚡ %d', '✔ OK']
 let g:ale_linters = {
-\   'cpp': ['gcc', 'cppcheck'],
-\   'c': ['gcc', 'cppcheck'],
+\   'cpp': ['g++'],
+\   'c': ['gcc'],
 \}
-" let g:ale_fixers = {
-" \   'cpp': ['clang-format'],
-" \   '*': ['remove_trailing_lines', 'trim_whitespace'],
-" \}
 let g:ale_linters_explicit = 1
 let g:ale_lint_on_text_changed = 'normal'
 let g:ale_lint_on_insert_leave = 1
+" let g:ale_lint_on_save = 1
 let g:ale_completion_delay = 500
 let g:ale_echo_delay = 20
-let g:ale_lint_delay = 500
+let g:ale_lint_delay = 200
 let g:ale_echo_msg_format = '[%linter%] %code: %%s'
 let g:ale_c_gcc_options = '-Wall -O2 -std=c99'
-let g:ale_cpp_gcc_options = '-Wall -O2 -std=c++11'
+let g:ale_cpp_gcc_options = '-Wall -O2 -std=c++17'
 let g:ale_c_cppcheck_options = ''
 let g:ale_cpp_cppcheck_options = ''
+let g:ale_c_parse_compile_commands=1
+" let g:ale_cpp_parse_compile_commands=1
 " let g:ale_cpp_clangtidy_checks = []
 " let g:ale_cpp_clangtidy_executable = 'clang-tidy'
-" let g:ale_c_parse_compile_commands=1
+" let g:ale_c_clangtidy_executable = 'clang-tidy'
 " let g:ale_cpp_clangtidy_extra_options = ''
-" let g:ale_cpp_clangtidy_options = ''
-" let g:ale_set_balloons=1
-nmap <silent> <LEADER>[ <Plug>(ale_previous_wrap)
-nmap <silent> <LEADER>] <Plug>(ale_next_wrap)
+" let g:ale_cpp_clangtidy_options = '-Wall -std=c++17 -x c++'
+" let g:ale_c_clangtidy_options = '-Wall -std=c99'
+let g:ale_set_balloons=1
+nmap <silent> [a <Plug>(ale_previous_wrap)
+nmap <silent> ]a <Plug>(ale_next_wrap)
 nmap <Leader>d :ALEDetail<CR>
 " tagbar
 set tags=./.tags;,.tags
@@ -312,7 +355,6 @@ endfunc
 " grep
 set grepprg=rg\ --vimgrep\ --smart-case\ --follow
 set grepformat^=%f:%l:%c:%m
-command! -nargs=+ Grep execute 'silent grep! <args>' | copen
 " search todo
 command! Todo execute 'silent grep! todo' | copen
 command! -nargs=? Help help <args> | only
