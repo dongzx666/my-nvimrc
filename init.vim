@@ -99,6 +99,10 @@ Plug 'metalelf0/supertab'
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
 
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
+Plug 'mbbill/undotree'
+Plug 'francoiscabrol/ranger.vim'
+Plug 'rbgrouleff/bclose.vim'
+
 Plug 'ryanoasis/vim-devicons'
 Plug 'altercation/vim-colors-solarized'
 Plug 'morhetz/gruvbox'
@@ -133,11 +137,30 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': 
 Plug 'lambdalisue/vim-manpager'
 Plug 'gauteh/vim-cppman'
 call plug#end()
+nnoremap <F5> :UndotreeToggle<CR>
+if has("persistent_undo")
+  let target_path = expand('~/.config/nvim/tmp/undodir')
+  " create the directory and any parent directories
+  " if the location does not exist.
+  if !isdirectory(target_path)
+    call mkdir(target_path, "p", 0700)
+  endif
+  let &undodir=target_path
+  set undofile
+endif
+" ranger
+let g:ranger_map_keys = 0
+map <F2> :Ranger<CR>
+let g:NERDTreeHijackNetrw = 0 " add this line if you use NERDTree
+let g:ranger_replace_netrw = 1 " open ranger when vim open a directory
+let g:ranger_command_override = 'ranger --cmd "set show_hidden=true"'
 " indentLine
 autocmd FileType json,markdown let g:indentLine_conceallevel = 0
+autocmd TermEnter * IndentLinesDisable
 " translator
 nmap <silent> <Leader>t <Plug>TranslateW
 vmap <silent> <Leader>t <Plug>TranslateWV
+let g:translator_window_type = "preview"
 " easymotion
 nmap <Leader>ss <Plug>(easymotion-s2)
 let g:EasyMotion_smartcase = 1
@@ -273,8 +296,10 @@ nnoremap <leader>n :NERDTreeFocus<CR>
 nmap <C-p> :Files<CR>
 nmap <C-e> :Buffers<CR>
 let g:fzf_action = { 'ctrl-e': 'edit' }
-let g:fzf_preview_window  = [ 'up:40%', 'ctrl-/' ]
+let g:fzf_preview_window  = [ 'up:60%', 'ctrl-/' ]
+let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9, 'relative': v:true } }
 let $FZF_DEFAULT_COMMAND = "rg --files"
+" let g:fzf_history_dir = '~/.config/nvim/tmp/fzfdir'
 " let $FZF_DEFAULT_COMMAND = "fdfind --exclude={.cache,.git,.idea,.vscode,.sass-cache,node_modules,tmp,CMakeFiles} --type f"
 command! -bang -nargs=* Rg
   \ call fzf#vim#grep(
