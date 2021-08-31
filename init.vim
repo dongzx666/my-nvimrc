@@ -1,5 +1,6 @@
 set encoding=UTF-8 "编码
-" set guifont=DroidSansMono\ Nerd\ Font\ 11
+set guifont=DroidSansMono\ Nerd\ Font\ 11
+set termguicolors
 set autoread " 当前文件在 Vim 外被修改且未在 Vim 里面重新载入的话，则自动重新读取
 set number "显示行号
 set cursorline  " 高亮当前行光标
@@ -93,6 +94,7 @@ nnoremap <LEADER>\ :g/^\s*$/d<CR>
 nnoremap <LEADER>co :copen<CR>
 nnoremap <LEADER>cc :cclose<CR>
 
+set rtp +=~/.vim
 call plug#begin('~/.vim/plugged')
 Plug 'metalelf0/supertab'
 
@@ -137,6 +139,9 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': 
 Plug 'lambdalisue/vim-manpager'
 Plug 'gauteh/vim-cppman'
 call plug#end()
+" vim-startify
+let g:startify_change_to_dir=0
+" undotree
 nnoremap <F5> :UndotreeToggle<CR>
 if has("persistent_undo")
   let target_path = expand('~/.config/nvim/tmp/undodir')
@@ -323,7 +328,7 @@ let g:ale_echo_delay = 20
 let g:ale_lint_delay = 200
 let g:ale_echo_msg_format = '[%linter%] %code: %%s'
 let g:ale_c_gcc_options = '-Wall -O2 -std=c99'
-let g:ale_cpp_gcc_options = '-Wall -O2 -std=c++17'
+let g:ale_cpp_gcc_options = '-Wall -O2 -std=c++11'
 let g:ale_c_cppcheck_options = ''
 let g:ale_cpp_cppcheck_options = ''
 let g:ale_c_parse_compile_commands=1
