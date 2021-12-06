@@ -1,6 +1,9 @@
 {
   "suggest.labelMaxLength": 80,
-  "clangd.fallbackFlags": [ "-std=c++11" ],
+  "clangd.fallbackFlags": [],
   "clangd.arguments": ["-j=4"],
-  "diagnostic.displayByAle": true
+  "diagnostic.displayByAle": true,
+  "snippets.extends": {
+    "cpp": ["c"]
+  }
 }

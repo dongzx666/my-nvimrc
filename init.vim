@@ -1,6 +1,6 @@
 set encoding=UTF-8 "编码
-set guifont=DroidSansMono\ Nerd\ Font\ 11
 set termguicolors
+" set guifont=DroidSansMono\ Nerd\ Font " neovim不支持该命令，只能修改终端字体
 set autoread " 当前文件在 Vim 外被修改且未在 Vim 里面重新载入的话，则自动重新读取
 set number "显示行号
 set cursorline  " 高亮当前行光标
@@ -44,8 +44,6 @@ filetype on " 文件类型检测功能
 filetype plugin on " 加载文件类型插件功能
 filetype indent on "  为不同类型的文件定义不同的缩进格式
 
-nmap <C-\> gcc
-vmap <C-\> gc
 noremap <silent> <C-j> 5j
 noremap <silent> <C-k> 5k
 noremap <silent> <C-h> b
@@ -96,13 +94,14 @@ nnoremap <LEADER>cc :cclose<CR>
 
 set rtp +=~/.vim
 call plug#begin('~/.vim/plugged')
-Plug 'metalelf0/supertab'
+" Plug 'metalelf0/supertab'
 
-Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+" Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+Plug 'honza/vim-snippets'
 
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
 Plug 'mbbill/undotree'
-Plug 'francoiscabrol/ranger.vim'
+"Plug 'francoiscabrol/ranger.vim'
 Plug 'rbgrouleff/bclose.vim'
 
 Plug 'ryanoasis/vim-devicons'
@@ -126,19 +125,54 @@ Plug 'ludovicchabant/vim-gutentags'
 Plug 'octol/vim-cpp-enhanced-highlight'
 
 Plug 'tpope/vim-surround'
-Plug 'tpope/vim-commentary'
+" Plug 'tpope/vim-commentary'
+Plug 'preservim/nerdcommenter'
 " Plug 'vim-scripts/DoxygenToolkit.vim'
 " Plug 'Chiel92/vim-autoformat'
+Plug 'sbdchd/neoformat'
+
 Plug 'luochen1990/rainbow'
 Plug 'voldikss/vim-translator'
+" Plug 'bujnlc8/vim-translator'
 Plug 'easymotion/vim-easymotion'
 Plug 'Yggdroot/indentLine'
 
+" Plug 'ianding1/leetcode.vim'
+
 " Plug 'plasticboy/vim-markdown'
+Plug 'tpope/vim-markdown'
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 Plug 'lambdalisue/vim-manpager'
 Plug 'gauteh/vim-cppman'
 call plug#end()
+" leetcode
+" let g:leetcode_browser='firefox'
+" nnoremap <leader>ll :LeetCodeList<cr>
+" nnoremap <leader>lt :LeetCodeTest<cr>
+" nnoremap <leader>ls :LeetCodeSubmit<cr>
+" nnoremap <leader>li :LeetCodeSignIn<cr>
+" neoformat
+let g:neoformat_basic_format_align = 1
+let g:neoformat_basic_format_retab = 1
+let g:neoformat_basic_format_trim = 1
+" https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+let g:neoformat_c_clangformat = {
+      \ 'exe': 'clang-format',
+      \ 'args': ['-style="{
+      \ ReflowComments: false,
+      \ AlignEscapedNewlines: Left,
+      \ AllowShortBlocksOnASingleLine: Empty}"'],
+      \ }
+let g:neoformat_cpp_clangformat = {
+      \ 'exe': 'clang-format',
+      \ 'args': ['-style="{
+      \ ReflowComments: false,
+      \ AlignEscapedNewlines: Left,
+      \ AlwaysBreakTemplateDeclarations: Yes,
+      \ AllowShortBlocksOnASingleLine: Empty}"'],
+      \ }
+let g:neoformat_enabled_cpp = ['clangformat']
+let g:neoformat_enabled_c = ['clangformat']
 " vim-startify
 let g:startify_change_to_dir=0
 " undotree
@@ -154,11 +188,11 @@ if has("persistent_undo")
   set undofile
 endif
 " ranger
-let g:ranger_map_keys = 0
-map <F2> :Ranger<CR>
-let g:NERDTreeHijackNetrw = 0 " add this line if you use NERDTree
-let g:ranger_replace_netrw = 1 " open ranger when vim open a directory
-let g:ranger_command_override = 'ranger --cmd "set show_hidden=true"'
+"let g:ranger_map_keys = 0
+"map <F2> :Ranger<CR>
+"let g:NERDTreeHijackNetrw = 0 " add this line if you use NERDTree
+"let g:ranger_replace_netrw = 1 " open ranger when vim open a directory
+"let g:ranger_command_override = 'ranger --cmd "set show_hidden=true"'
 " indentLine
 autocmd FileType json,markdown let g:indentLine_conceallevel = 0
 autocmd TermEnter * IndentLinesDisable
@@ -166,9 +200,16 @@ autocmd TermEnter * IndentLinesDisable
 nmap <silent> <Leader>t <Plug>TranslateW
 vmap <silent> <Leader>t <Plug>TranslateWV
 let g:translator_window_type = "preview"
+let g:translator_default_engines = ['bing', 'haici', 'youdao']
+
+" let g:translator_outputype='echo'
+" nmap <silent> <Leader>t :<C-u>Tc<CR>
+" vmap <silent> <Leader>t :<C-u>Tv<CR>
 " easymotion
 nmap <Leader>ss <Plug>(easymotion-s2)
 let g:EasyMotion_smartcase = 1
+" vim-markdown
+let g:markdown_fenced_languages = ['c', 'cpp', 'json', 'yaml', 'bash=sh']
 " markdown-preview
 let g:mkdp_browser = 'firefox'
 let g:mkdp_refresh_slow = 1
@@ -176,7 +217,15 @@ let g:mkdp_auto_close = 0
 let g:mkdp_refresh_slow = 1
 nmap <silent> <F9> <Plug>MarkdownPreview
 " vim-commentary, gcap注释一段，gcu撤销注释操作
-autocmd FileType c,cpp set commentstring=//\ %s
+" autocmd FileType cpp set commentstring=//\ %s
+" autocmd FileType c set commentstring=/*\ %s */
+" nerdcommenter
+let g:NERDCustomDelimiters = {
+      \'c': { 'left': '/*', 'right': '*/', 'leftAlt': '//'},
+      \'cpp': { 'left': '//', 'leftAlt': '/*', 'rightAlt': '*/' }
+      \}
+nmap <C-\> <leader>c<space>
+vmap <C-\> <leader>c<space>
 " ranbow
 let g:rainbow_active = 1
 " vim-scheme
@@ -201,25 +250,33 @@ let g:airline_symbols.maxlinenr = ' | '
 let g:airline_symbols.dirty='⚡'
 let g:airline_powerline_fonts = 1
 let g:airline#parts#ffenc#skip_expected_string='utf-8[unix]'
-let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#left_sep = ' '
 let g:airline#extensions#tabline#left_alt_sep = '|'
-let g:airline#extensions#tabline#buffer_idx_mode = 1
-let g:airline#extensions#tabline#buffer_idx_format = {
-  \ '1': '① ',
-  \ '2': '② ',
-  \ '3': '③ ',
-  \ '4': '④ ',
-  \ '5': '⑤ ',
-  \ '6': '⑥ ',
-  \ '7': '⑦ ',
-  \ '8': '⑧ ',
-  \ '9': '⑨ ',
-  \ '0': '⓪ ',
-\}
 let g:airline#extensions#whitespace#enabled = 0
 let g:airline#extensions#ale#enabled = 1
 let g:airline_theme='angr'
+
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#show_splits = 1
+" let g:airline#extensions#tabline#show_tabs = 1
+" let g:airline#extensions#tabline#tab_nr_type = 1 " splits and tab number
+" let g:airline#extensions#tabline#show_tab_nr = 1
+" let g:airline#extensions#tabline#show_tab_count = 1
+" let g:airline#extensions#tabline#tabnr_formatter = 'tabnr'
+let g:airline#extensions#tabline#show_buffers = 1
+let g:airline#extensions#tabline#buffer_idx_mode = 1
+let g:airline#extensions#tabline#buffer_idx_format = {
+      \ '1': '① ',
+      \ '2': '② ',
+      \ '3': '③ ',
+      \ '4': '④ ',
+      \ '5': '⑤ ',
+      \ '6': '⑥ ',
+      \ '7': '⑦ ',
+      \ '8': '⑧ ',
+      \ '9': '⑨ ',
+      \ '0': '⓪ ',
+      \}
 nmap <leader>1 <Plug>AirlineSelectTab1
 nmap <leader>2 <Plug>AirlineSelectTab2
 nmap <leader>3 <Plug>AirlineSelectTab3
@@ -246,7 +303,7 @@ function! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
-inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
+inoremap <silent><expr> <CR> pumvisible() ? coc#_select_confirm()
       \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 nnoremap <silent> D :call <SID>show_documentation()<CR>
 function! s:show_documentation()
@@ -279,18 +336,19 @@ xmap if <Plug>(coc-funcobj-i)
 xmap af <Plug>(coc-funcobj-a)
 omap if <Plug>(coc-funcobj-i)
 omap af <Plug>(coc-funcobj-a)
-noremap <F3> :call CocAction('format')<CR>
+" noremap <F3>f :call CocAction('format')<CR>
+noremap <F3> :Neoformat<CR>
 command! -nargs=? Fold :call     CocAction('fold', <f-args>)
 command! -nargs=0 Format :call CocAction('format')
 command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
 let g:coc_global_extensions = [
-  \ 'coc-snippets',
-  \ 'coc-json',
-  \ 'coc-yaml',
-  \ 'coc-cmake',
-  \ 'coc-marketplace',
-  \ 'coc-clangd',
-  \ 'coc-pairs']
+      \ 'coc-snippets',
+      \ 'coc-json',
+      \ 'coc-yaml',
+      \ 'coc-cmake',
+      \ 'coc-marketplace',
+      \ 'coc-clangd',
+      \ 'coc-pairs']
 " NERDTree
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
@@ -307,18 +365,18 @@ let $FZF_DEFAULT_COMMAND = "rg --files"
 " let g:fzf_history_dir = '~/.config/nvim/tmp/fzfdir'
 " let $FZF_DEFAULT_COMMAND = "fdfind --exclude={.cache,.git,.idea,.vscode,.sass-cache,node_modules,tmp,CMakeFiles} --type f"
 command! -bang -nargs=* Rg
-  \ call fzf#vim#grep(
-  \   'rg --column --line-number --hidden --smart-case --no-heading --color=always '.shellescape(<q-args>), 1,
-  \   <bang>0 ? fzf#vim#with_preview({'options': '--delimiter : --nth 4..'})
-  \           : fzf#vim#with_preview({'options': '--delimiter : --nth 4.. -e'}),
-  \   <bang>0)
+      \ call fzf#vim#grep(
+      \   'rg --column --line-number --hidden --smart-case --no-heading --color=always '.shellescape(<q-args>), 1,
+      \   <bang>0 ? fzf#vim#with_preview({'options': '--delimiter : --nth 4..'})
+      \           : fzf#vim#with_preview({'options': '--delimiter : --nth 4.. -e'}),
+      \   <bang>0)
 
 " ale
 set fenc=
 let g:ale_linters = {
-\   'cpp': ['g++'],
-\   'c': ['gcc'],
-\}
+      \   'cpp': ['gcc'],
+      \   'c': ['gcc'],
+      \}
 let g:ale_linters_explicit = 1
 let g:ale_lint_on_text_changed = 'normal'
 let g:ale_lint_on_insert_leave = 1
@@ -327,10 +385,10 @@ let g:ale_completion_delay = 500
 let g:ale_echo_delay = 20
 let g:ale_lint_delay = 200
 let g:ale_echo_msg_format = '[%linter%] %code: %%s'
-let g:ale_c_gcc_options = '-Wall -O2 -std=c99'
-let g:ale_cpp_gcc_options = '-Wall -O2 -std=c++11'
-let g:ale_c_cppcheck_options = ''
-let g:ale_cpp_cppcheck_options = ''
+let g:ale_c_cc_options = '-Wall -O2 -std=c99'
+let g:ale_cpp_cc_options = '-Wall -O2 -std=c++17'
+" let g:ale_c_cppcheck_options = ''
+" let g:ale_cpp_cppcheck_options = ''
 let g:ale_c_parse_compile_commands=1
 " let g:ale_cpp_parse_compile_commands=1
 " let g:ale_cpp_clangtidy_checks = []
@@ -362,11 +420,11 @@ let g:cpp_posix_standard = 1
 let g:cpp_experimental_template_highlight = 1
 let g:cpp_concepts_highlight = 1
 " supertab
-let g:SuperTabDefaultCompletionType = '<C-n>'
+" let g:SuperTabDefaultCompletionType = '<C-n>'
 " ultisnips
-let g:UltiSnipsExpandTrigger="<c-e>"
-let g:UltiSnipsJumpForwardTrigger="<c-j>"
-let g:UltiSnipsJumpBackwardTrigger="<c-k>"
+" let g:UltiSnipsExpandTrigger="<c-e>"
+" let g:UltiSnipsJumpForwardTrigger="<c-j>"
+" let g:UltiSnipsJumpBackwardTrigger="<c-k>"
 " function-compile
 noremap <F1> :call CompileRunGcc()<CR>
 func! CompileRunGcc()
